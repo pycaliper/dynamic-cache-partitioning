@@ -1,0 +1,8 @@
+{
+    "jasper" : {
+        "jdir"      : "mydesigns/dawg",
+        "script"    : "dawg.tcl",
+        "pycfile"   : "cacheline_plru.pyc.sv",
+        "context"   : "<embedded>::miter"
+    }
+}
