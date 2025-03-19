@@ -3,7 +3,11 @@
 from pycaliper.per import *
 
 from pycaliper.pycmanager import PYCArgs, setup_all
-from pycaliper.synth.persynthesis import PERSynthesizer, IISStrategy, SeqStrategy, RandomStrategy, LLMStrategy
+from pycaliper.synth.persynthesis import PERSynthesizer, IISStrategy, SeqStrategy, RandomStrategy, LLMStrategy, HoudiniSynthesizerJG, HoudiniSynthesizerConfig, HoudiniSynthesizerBTOR
+from pycaliper.proofmanager import mk_btordesign
+from pycaliper.pycconfig import DesignConfig
+from pycaliper.verif.jgverifier import JGDesign
+
 
 from cacheline_nru import cacheline_nru
 
@@ -16,13 +20,27 @@ def dawg_synth(strat: IISStrategy, fuelbudget: int, stepbudget: int, retries: in
 
     assert is_conn, "Connection to Jasper failed!"
 
-    synthesizer = PERSynthesizer(pyconfig, strat, fuelbudget, stepbudget)
+    # synthesizer = PERSynthesizer(pyconfig, strat, fuelbudget, stepbudget)
+    # synthesizer = HoudiniSynthesizerJG()
+    synthesizer = HoudiniSynthesizerBTOR()
 
     params = {"MODE": 0, "k": k}
-
     module = cacheline_nru(**params).instantiate()
-    finalmod = synthesizer.synthesize(module, retries)
 
+    # finalmod = synthesizer.synthesize(module, retries)
+    # finalmod, stats = synthesizer.synthesize(module, 
+    #                                          JGDesign("cacheline_nru", pyconfig), 
+    #                                          pyconfig.dc,
+    #                                          strat,
+    #     HoudiniSynthesizerConfig(fuelbudget=fuelbudget, 
+    #                              stepbudget=stepbudget, retries=retries))
+    finalmod, stats = synthesizer.synthesize(module,
+        mk_btordesign("cacheline_nru", "DAWG/cacheline_nru_miter.btor"),
+        DesignConfig(), 
+        strat,
+        HoudiniSynthesizerConfig(fuelbudget=fuelbudget, stepbudget=stepbudget, retries=retries))
+
+    print(f"Synthesis stats: minfuel={stats.minfuel}, solvecalls={stats.solvecalls}, steps={stats.steps}, success={stats.success}")
     tmgr.save_spec(finalmod)
     tmgr.save()
 

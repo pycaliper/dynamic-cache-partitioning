@@ -1,4 +1,4 @@
-from pycaliper.per import SpecModule, Logic, LogicArray, unroll, kinduct
+from pycaliper.per import SpecModule, Logic, LogicArray, unroll, kinduct, Clock
 from pycaliper.per.expr import *
 import math
 
@@ -24,6 +24,8 @@ class cacheline_nru(SpecModule):
         self.k = kwargs.get("k", 2)
         # Reset input
         self.reset = Logic()
+
+        self.clk = Clock()
 
         # OS request and requested address field
         self.os_req = Logic()
