@@ -6,7 +6,9 @@ from pycaliper.pycmanager import PYCArgs, setup_all
 from pycaliper.synth.persynthesis import PERSynthesizer, IISStrategy, SeqStrategy, RandomStrategy, LLMStrategy, HoudiniSynthesizerJG, HoudiniSynthesizerConfig, HoudiniSynthesizerBTOR
 from pycaliper.proofmanager import mk_btordesign
 from pycaliper.pycconfig import DesignConfig
-from pycaliper.verif.jgverifier import JGDesign
+from pycaliper.jginterface.jgdesign import JGDesign
+from pycaliper.verif.jgverifier import JGVerifier2Trace
+from pycaliper.verif.btorverifier import BTORVerifier2Trace
 
 
 from cacheline_nru import cacheline_nru
@@ -44,6 +46,32 @@ def dawg_synth(strat: IISStrategy, fuelbudget: int, stepbudget: int, retries: in
     tmgr.save_spec(finalmod)
     tmgr.save()
 
+
+def dawg_verif(k):
+    args = PYCArgs(jgcpath="config_nru.json")
+    is_conn, pyconfig, tmgr = setup_all(args)
+
+    assert is_conn, "Connection to Jasper failed!"
+
+    verifierjg = JGVerifier2Trace()
+    verifierbtor = BTORVerifier2Trace()
+    
+    params = {"MODE": 0, "k": k}
+    module = cacheline_nru(**params).instantiate()
+
+    resbtor = verifierbtor.verify(module, 
+                                      mk_btordesign("cacheline_nru", "DAWG/cacheline_nru_miter.btor"),
+                                      DesignConfig())
+    
+    if not resbtor.verified:
+        with open("trace.vcd", "w") as f:
+            f.write(resbtor.model)
+
+    resjg = verifierjg.verify(module, pyconfig)
+
+    print(f"Verification result: {resbtor.verified} (BTOR), {resjg} (JG)")
+
+
 if __name__ == "__main__":
     # Parse arguments
     import argparse
@@ -68,4 +96,4 @@ if __name__ == "__main__":
         
     # Synthesize the design
     dawg_synth(strat, args.fuelbudget, args.stepbudget, args.retries, args.k)
-
+    # dawg_verif(args.k)

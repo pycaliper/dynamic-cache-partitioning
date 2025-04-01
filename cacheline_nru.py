@@ -32,8 +32,8 @@ class cacheline_nru(SpecModule):
         self.hitmap = Logic(self.NUM_WAYS)
 
         # Auxilliary state
-        self.attacker_domain = Logic(root="miter")
-        self.attacker_hitmap = Logic(self.NUM_WAYS, root="miter")
+        self.attacker_domain = Logic(root="")
+        self.attacker_hitmap = Logic(self.NUM_WAYS, root="")
 
         # User request and input
         self.user_req = Logic()
@@ -73,11 +73,12 @@ class cacheline_nru(SpecModule):
     def state(self):
 
         # Attacker query
-        self.inv(~self.attacker_domain | (self.policy_hitmap == self.attacker_hitmap))
+        self.inv((~self.attacker_domain) | (self.policy_hitmap == self.attacker_hitmap))
         # Non-attacker query
         self.inv(
             self.attacker_domain
             | OpApply(
+                # UnaryBitwiseAnd(), [(self.policy_hitmap.eneg()).eor(self.attacker_hitmap.eneg())]
                 UnaryBitwiseAnd(), [(~self.policy_hitmap) | (~self.attacker_hitmap)]
             )
         )

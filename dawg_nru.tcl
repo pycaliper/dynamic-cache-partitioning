@@ -40,10 +40,10 @@ elaborate \
     -no_preconditions \
 
 # Add auxilliary variables
-connect -bind auxreg attacker_domain -parameter WIDTH 1
-connect -elaborate
-connect -bind auxreg attacker_hitmap -parameter WIDTH 8
-connect -elaborate
+# connect -bind auxreg attacker_domain -parameter WIDTH 1
+# connect -elaborate
+# connect -bind auxreg attacker_hitmap -parameter WIDTH 8
+# connect -elaborate
 
 proc write_reset_seq {file} {
     puts $file "fvreset 1'b1"
