@@ -78,7 +78,6 @@ class cacheline_nru(SpecModule):
         self.inv(
             self.attacker_domain
             | OpApply(
-                # UnaryBitwiseAnd(), [(self.policy_hitmap.eneg()).eor(self.attacker_hitmap.eneg())]
                 UnaryBitwiseAnd(), [(~self.policy_hitmap) | (~self.attacker_hitmap)]
             )
         )
@@ -99,14 +98,6 @@ class cacheline_nru(SpecModule):
                     for j in range(self.NUM_WAYS - self.k, self.NUM_WAYS)
                 ],
             )
-
-        # for i in range(5, 8):
-        #     for j in range(5, 8):
-        #         self.when(self.attacker_hitmap(i))(self.metadata(j))
-        # self.when(self.attacker_hitmap(i))(self.policy_hitmap(i))
-        # self.condeqhole(self.attacker_hitmap(2),
-        #                 # [self.metadata(i) for i in range(self.NUM_WAYS)]
-        #                 [self.metadata(i) for i in [1, 2]])
 
     @unroll(3)
     def simstep(self, i):
