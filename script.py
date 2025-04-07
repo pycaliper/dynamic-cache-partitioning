@@ -92,6 +92,8 @@ if __name__ == "__main__":
     match args.strategy:
         case "seq":
             strat = SeqStrategy()
+        case "rand":
+            strat = RandomStrategy()
         case "llm":
             strat = LLMStrategy()
         case _:
